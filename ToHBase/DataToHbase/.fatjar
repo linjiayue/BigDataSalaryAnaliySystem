@@ -1,0 +1,14 @@
+#Fat Jar Configuration File
+#Fri Dec 18 16:28:33 CST 2015
+onejar.license.required=false
+manifest.classpath=
+manifest.removesigners=true
+onejar.checkbox=true
+jarname=C\:\\Users\\Administrator\\Desktop\\DataToHbase.jar
+manifest.mergeall=true
+manifest.mainclass=com.lin.main.DataToHbaseMain
+manifest.file=<createnew>
+jarname.isextern=true
+onejar.expand=
+excludes=<po|DataToHbase>~Test.class
+includes=
