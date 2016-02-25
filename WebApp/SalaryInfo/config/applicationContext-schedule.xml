@@ -28,6 +28,15 @@
 <!-- 	        <value>test</value>   -->
 	    </property>  
 	</bean>  
+	<!--  统计，每天，每个城市，平均工资的数量 -->
+    <bean id="analysisDayCitySCountMethod" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">  
+	    <property name="targetObject">  
+	        <ref bean="scheduleService"/>  
+	    </property>  
+	    <property name="targetMethod">  <!-- 要执行的方法名称 -->  
+	        <value>analysisDayCitySCount</value>  
+	    </property>  
+	</bean>  
 	  
 	<!-- ======================== 调度触发器 ======================== -->  
 	<!-- 分析 每天，每个城市，每个职位数的数据 -->
@@ -37,12 +46,19 @@
 	    <property name="cronExpression" value="0 0 2 * * ? "></property> 
 <!-- 	    <property name="cronExpression" value="0 28 11 * * ? "></property>   -->
 	</bean>  
+	<!-- 统计，每天，每个城市，平均工资的数量 -->
+	<bean id="ADCSCCronTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerBean">  
+	    <property name="jobDetail" ref="analysisDayCitySCountMethod"></property>  
+	    <!-- 每天1时执行 -->
+	    <property name="cronExpression" value="0 0 1 * * ? "></property> 
+	</bean>  
 	  
 	<!-- ======================== 调度工厂 ======================== -->  
 	<bean id="SpringJobSchedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">  
 	    <property name="triggers">  
 	        <list>  
 	            <ref bean="ADCPCCronTriggerBean"/>  
+	            <ref bean="ADCSCCronTriggerBean"/>  
 	        </list>  
 	    </property>  
 	</bean>    

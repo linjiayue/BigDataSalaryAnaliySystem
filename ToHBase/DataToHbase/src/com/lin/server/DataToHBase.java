@@ -7,11 +7,14 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.sf.json.JSONObject;
 
@@ -166,7 +169,38 @@ public class DataToHBase {
 			//保存数据插入时间
 			put.addColumn("PositionInfoFamily".getBytes(), "insertDate".getBytes(), (DateUtils.getDateFormat(new Date(), "yyyyMMdd")).getBytes());
 			put.addColumn("PositionInfoFamily".getBytes(), "salary".getBytes(), (dataMap.get("salary").toString()).getBytes());
+			List<Integer> matchesLists = findMatchesValue(dataMap.get("salary").toString());
+			if(matchesLists.size() != 0 && matchesLists.size() == 1){
+				//薪资中只标明一种薪资值得情况，如 15K以上，默认将此值作为最大值与最小值
+				put.addColumn("PositionInfoFamily".getBytes(), "minValue".getBytes(), matchesLists.get(0).toString().getBytes());
+				put.addColumn("PositionInfoFamily".getBytes(), "maxValue".getBytes(), matchesLists.get(0).toString().getBytes());
+				put.addColumn("PositionInfoFamily".getBytes(), "aveValue".getBytes(), matchesLists.get(0).toString().getBytes());
+			}
+			if(matchesLists.size() != 0 && matchesLists.size() == 2){
+				//薪资中只标明为类似 15k-20k 
+				put.addColumn("PositionInfoFamily".getBytes(), "minValue".getBytes(), matchesLists.get(0).toString().getBytes());
+				put.addColumn("PositionInfoFamily".getBytes(), "maxValue".getBytes(), matchesLists.get(1).toString().getBytes());
+				Integer aveValue = (matchesLists.get(0) + matchesLists.get(1)) / 2;
+				put.addColumn("PositionInfoFamily".getBytes(), "aveValue".getBytes(), aveValue.toString().getBytes());
+			}
+			matchesLists = findMatchesValue(dataMap.get("workYear").toString());
+			if(matchesLists.size() == 0){
+				put.addColumn("PositionInfoFamily".getBytes(), "minWYValue".getBytes(), "0".getBytes());
+				put.addColumn("PositionInfoFamily".getBytes(), "maxWYValue".getBytes(), "0".getBytes());
+				put.addColumn("PositionInfoFamily".getBytes(), "aveWYValue".getBytes(), "0".getBytes());
+			}else if(matchesLists.size() == 1){
+				put.addColumn("PositionInfoFamily".getBytes(), "minWYValue".getBytes(), matchesLists.get(0).toString().getBytes());
+				put.addColumn("PositionInfoFamily".getBytes(), "maxWYValue".getBytes(), matchesLists.get(0).toString().getBytes());
+				put.addColumn("PositionInfoFamily".getBytes(), "aveWYValue".getBytes(), matchesLists.get(0).toString().getBytes());
+			}else if(matchesLists.size() == 2){
+				put.addColumn("PositionInfoFamily".getBytes(), "minWYValue".getBytes(), matchesLists.get(0).toString().getBytes());
+				put.addColumn("PositionInfoFamily".getBytes(), "maxWYValue".getBytes(), matchesLists.get(1).toString().getBytes());
+				Integer aveWYValue = (matchesLists.get(0) + matchesLists.get(1)) / 2;
+				put.addColumn("PositionInfoFamily".getBytes(), "aveWYValue".getBytes(), aveWYValue.toString().getBytes());
+			}
+			
 			put.addColumn("PositionInfoFamily".getBytes(), "workYear".getBytes(), (dataMap.get("workYear").toString()).getBytes());
+			
 			put.addColumn("PositionInfoFamily".getBytes(), "city".getBytes(), (dataMap.get("city").toString()).getBytes());
 			put.addColumn("PositionInfoFamily".getBytes(), "createTimeSort".getBytes(), (dataMap.get("createTimeSort").toString()).getBytes());
 			
@@ -268,5 +302,40 @@ public class DataToHBase {
 		return companyId + suffixRandDom.toString();
 		
 	}
-	
+	/**
+	 * Add by linjy on 2016-01-25
+	 * @param salary	薪资字符串
+	 * @return
+	 * 返回提取出的工资
+	 */
+	private List<Integer> findSalaryValue(String salary){
+		String regEx = "(\\d+)";
+		Pattern pat = Pattern.compile(regEx);
+		Matcher mat = pat.matcher(salary);
+		List<Integer> lists = new ArrayList<Integer>();
+		while(mat.find()){
+			lists.add(Integer.parseInt(mat.group(0)));
+		}
+		//对工资进行排序，默认从小到大
+		Collections.sort(lists);
+		return lists;
+	}
+	/**
+	 * Add by linjy on 2016-01-25
+	 * @param mStr	需要提前的字符串
+	 * @return
+	 * 返回提取出的数值内容
+	 */
+	private List<Integer> findMatchesValue(String mStr){
+		String regEx = "(\\d+)";
+		Pattern pat = Pattern.compile(regEx);
+		Matcher mat = pat.matcher(mStr);
+		List<Integer> lists = new ArrayList<Integer>();
+		while(mat.find()){
+			lists.add(Integer.parseInt(mat.group(0)));
+		}
+		//对提取出的数值进行排序，默认从小到大
+		Collections.sort(lists);
+		return lists;
+	}
 }

@@ -165,6 +165,7 @@ public class MainDaoImpl implements MainDao {
 	@Override
 	public List<Map<String, String>> queryHiveBySql(String sql)
 			throws Exception {
+		logger.info("读取Hive数据，执行语句为：" + sql);
 		java.sql.Connection conn = HiveUtils.getConn();
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(sql);
@@ -180,6 +181,7 @@ public class MainDaoImpl implements MainDao {
 	 */
 	@Override
 	public void executeSqlForHive(String sql) throws Exception {
+		logger.info("读取Hive数据，执行语句为：" + sql);
 		java.sql.Connection conn = HiveUtils.getConn();
 		Statement st = conn.createStatement();
 		st.execute(sql);
@@ -227,7 +229,7 @@ public class MainDaoImpl implements MainDao {
 	 * @throws IllegalArgumentException 
 	 */
 	@Override
-	public List<Map<String, String>> getBSGSInfo(String startDate,String endDate, String familyName) throws Exception {
+	public List<Map<String, String>> getBSGSInfo(String startDate,String endDate, String familyName,String flag) throws Exception {
 		
 		Connection conn = HBaseUtils.getConnection();
 		Table table = conn.getTable(TableName.valueOf("SalaryInfoResult".getBytes()));
@@ -243,6 +245,7 @@ public class MainDaoImpl implements MainDao {
 		filterList.addFilter(new SingleColumnValueFilter("ResultInfoFamily".getBytes(), "city".getBytes(), CompareOp.EQUAL,  "上海".getBytes()));
 		filterList.addFilter(new SingleColumnValueFilter("ResultInfoFamily".getBytes(), "city".getBytes(), CompareOp.EQUAL,  "深圳".getBytes()));
 		filterList.addFilter(new SingleColumnValueFilter("ResultInfoFamily".getBytes(), "city".getBytes(), CompareOp.EQUAL,  "广州".getBytes()));
+		filterList.addFilter(new SingleColumnValueFilter("ResultInfoFamily".getBytes(),"flag".getBytes(),CompareOp.EQUAL,flag.getBytes()));
 		scan.setFilter(filterList);
 		
 		List<Map<String, String>> resultList = new ArrayList<Map<String,String>>();
@@ -281,12 +284,39 @@ public class MainDaoImpl implements MainDao {
 		HBaseUtils.closeConn(conn);
 		return falg;
 	}
-	
-	public static void main(String[] args) throws Exception, IOException {
+	/**
+	 * Add by linjy on 2016-02-19
+	 * @param tableName		表名
+	 * @param familyName	簇名
+	 * @param flag			区分标志位
+	 * @return
+	 * @throws Exception
+	 * 判断指定标志下是否有内容
+	 */
+	public boolean tableIsTmptyByFlag(String tableName,String familyName,String flag) throws Exception {
+		boolean falg = false;
 		Connection conn = HBaseUtils.getConnection();
 		Table table = conn.getTable(TableName.valueOf("T".getBytes()));
 		Scan scan = new Scan();
+		Filter filter = new SingleColumnValueFilter(familyName.getBytes(),"flag".getBytes(),CompareOp.EQUAL,flag.getBytes());
+		scan.setFilter(filter);
+		ResultScanner rss = table.getScanner(scan);
+		Result rs = rss.next();
+		if(null == rs){
+			falg = true;
+		}
+		table.close();
+		HBaseUtils.closeConn(conn);
+		return falg;
+	}
+	
+	public static void main(String[] args) throws Exception, IOException {
+		Connection conn = HBaseUtils.getConnection();
+		Table table = conn.getTable(TableName.valueOf("SalaryInfoResult".getBytes()));
+		Scan scan = new Scan();
 //		scan.addFamily("ResultInfoFamily".getBytes());
+		Filter filter = new SingleColumnValueFilter("ResultInfoFamily".getBytes(),"flag".getBytes(),CompareOp.EQUAL,"1".getBytes());
+		scan.setFilter(filter);
 		ResultScanner rss = table.getScanner(scan);
 		Result rs = rss.next();
 		if(null == rs){

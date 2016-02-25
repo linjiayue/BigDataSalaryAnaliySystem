@@ -365,7 +365,7 @@ public class MainServiceImpl implements MainService {
 	@Override
 	public Map<String, Map<String, String>> getBSGSInfo(String startDate,
 			String endDate, String familyName) throws Exception {
-		List<Map<String, String>> resultList = mainDao.getBSGSInfo(startDate, endDate, familyName);
+		List<Map<String, String>> resultList = mainDao.getBSGSInfo(startDate, endDate, familyName,"0");
 		//获得省份城市对应Map
 		Map<String,String> cpMap = mainDao.getCityProMap();
 		Map<String,Map<String,String>> resultMap = new HashMap<String, Map<String,String>>();

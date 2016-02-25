@@ -21,7 +21,7 @@ import com.lin.utils.LoggerUtils;
 /**
  * Add by linjy on 2015-12-17
  * @author linjy
- * 数据处理控制类
+ * 职位分析控制类
  *
  */
 @Controller
@@ -137,8 +137,10 @@ public class MainController {
 	public Map<String,Map<String,String>> getBSGSInfoUHive(String startDate,String endDate){
 		try{
 			logger.info("返回北上广深职位需求量折线图数据处理开始....");
-			startDate = (null == startDate) ? DateUtils.getDateFormat(new Date(), "yyyy") + "0101" : formatDate(startDate);
-			endDate = (null == endDate) ? DateUtils.getDateFormat(new Date(), "yyyy") + "1231" : formatDate(endDate);
+			startDate = (null == startDate) ? DateUtils.getDateFormat(new Date(), "yyyy") + "-01-01" : startDate.trim();
+			endDate = (null == endDate) ? DateUtils.getDateFormat(new Date(), "yyyy") + "-12-31" : endDate.trim();
+//			startDate = (null == startDate) ? DateUtils.getDateFormat(new Date(), "yyyy") + "0101" : formatDate(startDate);
+//			endDate = (null == endDate) ? DateUtils.getDateFormat(new Date(), "yyyy") + "1231" : formatDate(endDate);
 			Map<String,Map<String,String>> map = mainService.getBSGSInfoUHive(startDate, endDate);
 			logger.info("返回北上广深职位需求量折线图数据处理结束....");
 			return map;
@@ -181,8 +183,10 @@ public class MainController {
 	public JSONObject getTotalCountByBarUHive(String startDate,String endDate){
 		try{
 			logger.info("获取职位需求总量数据处理开始....");
-			startDate = (null == startDate) ? DateUtils.getDateFormat(new Date(), "yyyy") + "0101" : formatDate(startDate);
-			endDate = (null == endDate) ? DateUtils.getDateFormat(new Date(), "yyyy") + "1231" : formatDate(endDate);
+			startDate = (null == startDate) ? DateUtils.getDateFormat(new Date(), "yyyy") + "-01-01" : startDate.trim();
+			endDate = (null == endDate) ? DateUtils.getDateFormat(new Date(), "yyyy") + "-12-31" : endDate.trim();
+//			startDate = (null == startDate) ? DateUtils.getDateFormat(new Date(), "yyyy") + "0101" : formatDate(startDate);
+//			endDate = (null == endDate) ? DateUtils.getDateFormat(new Date(), "yyyy") + "1231" : formatDate(endDate);
 			
 			JSONObject object = mainService.getTotalCountByBarUHive(startDate, endDate);
 			logger.info("获取职位需求总量数据处理结束....");

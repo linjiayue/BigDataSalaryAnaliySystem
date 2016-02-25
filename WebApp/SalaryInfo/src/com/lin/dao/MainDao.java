@@ -18,7 +18,9 @@ public interface MainDao {
 	public List<Map<String, String>> scanResultByDate(String startDate,
 			String endDate, String familyName,String flag) throws Exception;
 	
-	public List<Map<String, String>> getBSGSInfo(String startDate,String endDate,String familyName) throws Exception;
+	public List<Map<String, String>> getBSGSInfo(String startDate,String endDate,String familyName,String flag) throws Exception;
 	
 	public boolean tableIsTmpty(String tableName) throws Exception;
+	
+	public boolean tableIsTmptyByFlag(String tableName,String familyName,String flag) throws Exception;
 }
